@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">{{ proposal.title }}</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    <i class="bi bi-clock"></i> Created: {{ proposal.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                </p>
+
+                {% if proposal.status == 'voting' %}
+                    <hr>
+                    {% if current_user.is_authenticated %}
+                    <h4>Suggest a Time & Location</h4>
+                    <form action="{{ url_for('add_suggestion', proposal_id=proposal.id) }}" method="POST" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date and Time</label>
+                                <input type="datetime-local" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" required
+                                       placeholder="e.g., Tech Hub Coworking Space, 123 Main St">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Suggestion
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="text-muted">
+                        <a href="{{ url_for('login') }}">Login</a> to suggest a time and location
+                    </p>
+                    {% endif %}
+
+                    <h4>Current Suggestions</h4>
+                    {% if suggestions %}
+                        {% for suggestion in suggestions %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title mb-1">
+                                            <i class="bi bi-calendar"></i> {{ suggestion.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                        </h5>
+                                        <p class="card-text">
+                                            <i class="bi bi-geo-alt"></i> {{ suggestion.location }}
+                                        </p>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary">
+                                                <i class="bi bi-hand-thumbs-up"></i> {{ suggestion_votes[suggestion.id] }} votes
+                                            </span>
+                                        </div>
+                                        {% if current_user.is_authenticated %}
+                                        <form action="{{ url_for('vote_suggestion', suggestion_id=suggestion.id) }}" method="POST" style="display: inline;">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-hand-thumbs-up"></i> Vote
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if current_user.is_authenticated and current_user.id == proposal.created_by %}
+                        <form action="{{ url_for('finalize_proposal', proposal_id=proposal.id) }}" method="POST" class="mt-4">
+                            <div class="mb-3">
+                                <label for="suggestion_id" class="form-label">Select Final Time & Location</label>
+                                <select class="form-select" id="suggestion_id" name="suggestion_id" required>
+                                    <option value="">Choose the winning suggestion...</option>
+                                    {% for suggestion in suggestions %}
+                                    <option value="{{ suggestion.id }}">
+                                        {{ suggestion.date.strftime('%B %d, %Y at %I:%M %p') }} at {{ suggestion.location }}
+                                        ({{ suggestion_votes[suggestion.id] }} votes)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Finalize Meetup
+                            </button>
+                        </form>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No suggestions yet. Be the first to suggest a time and location!
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> This proposal has been finalized into a meetup!
+                        <a href="{{ url_for('index') }}">View it on the homepage</a>.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

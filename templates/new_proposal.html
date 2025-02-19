@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Create New Meetup Proposal</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <h4>Initial Time/Location Suggestion (Optional)</h4>
+                    <p class="text-muted mb-3">You can provide an initial suggestion, or let others suggest times and locations first.</p>
+                    
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Suggested Date and Time</label>
+                        <input type="datetime-local" class="form-control" id="date" name="date">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Suggested Location</label>
+                        <input type="text" class="form-control" id="location" name="location"
+                               placeholder="e.g., Tech Hub Coworking Space, 123 Main St">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-calendar-plus"></i> Create Proposal
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Meetups
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Proposals Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Meetup Proposals</h1>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('new_proposal') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Proposal
+            </a>
+            {% endif %}
+        </div>
+
+        {% if proposals %}
+            {% for proposal in proposals %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ proposal.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        <i class="bi bi-clock"></i> Created: {{ proposal.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </h6>
+                    
+                    <a href="{{ url_for('view_proposal', proposal_id=proposal.id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar2-check"></i> View & Vote
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info mb-5">
+                <i class="bi bi-info-circle"></i> No active proposals.
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('new_proposal') }}">Create one!</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Upcoming Meetups Section -->
+        <h2 class="mt-5 mb-4">Finalized Meetups</h2>
+        {% if meetups %}
+            {% for meetup in meetups %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ meetup.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        <i class="bi bi-calendar"></i> {{ meetup.date.strftime('%B %d, %Y at %I:%M %p') }}
+                    </h6>
+                    <p class="card-text">
+                        <i class="bi bi-geo-alt"></i> {{ meetup.location }}
+                    </p>
+                    
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('rsvp', meetup_id=meetup.id) }}" method="POST" class="mt-3">
+                        <div class="btn-group" role="group">
+                            <button type="submit" name="status" value="yes" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Going
+                            </button>
+                            <button type="submit" name="status" value="maybe" class="btn btn-warning">
+                                <i class="bi bi-question-circle"></i> Maybe
+                            </button>
+                            <button type="submit" name="status" value="no" class="btn btn-danger">
+                                <i class="bi bi-x-circle"></i> Can't Go
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <p class="text-muted">
+                        <a href="{{ url_for('login') }}">Login</a> to RSVP for this meetup
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No upcoming meetups scheduled.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
