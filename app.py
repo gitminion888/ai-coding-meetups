@@ -22,11 +22,18 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Only create tables when running the app directly (not through gunicorn)
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, port=8083)
+# Initialize database tables
+def init_db():
+    try:
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully!")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+        raise
+
+# Initialize database tables on startup
+init_db()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -271,4 +278,7 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index')) 
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8083) 
