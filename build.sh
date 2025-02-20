@@ -9,4 +9,7 @@ apt-get install -y python3-dev libpq-dev
 # Install Python dependencies
 pip install --upgrade pip
 pip install psycopg2-binary
-pip install -r requirements.txt 
+pip install -r requirements.txt
+
+# Initialize the database
+python init_db.py 

@@ -9,13 +9,24 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24))
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///meetups.db')
-if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
+
+# Get the database URL and fix postgres:// if needed
+database_url = os.getenv('DATABASE_URL', 'sqlite:///meetups.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# Only create tables when running the app directly (not through gunicorn)
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, port=8083)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -260,9 +271,4 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, port=8083) 
+    return redirect(url_for('index')) 
