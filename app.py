@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -15,8 +16,15 @@ database_url = os.getenv('DATABASE_URL', 'sqlite:///meetups.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
+# Add SSL mode to PostgreSQL connection
+if database_url.startswith('postgresql://'):
+    database_url += '?sslmode=require'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Configure the port for Render
+port = int(os.getenv('PORT', 10000))
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -281,4 +289,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8083) 
+    app.run(debug=True, port=port) 
